@@ -58,7 +58,10 @@ public class NamesrvStartup {
 
     public static NamesrvController main0(String[] args) {
         try {
+            // tywings: 解析入参命令
             parseCommandlineAndConfigFile(args);
+
+            // tywings：核心启动代码
             NamesrvController controller = createAndStartNamesrvController();
             return controller;
         } catch (Throwable e) {
