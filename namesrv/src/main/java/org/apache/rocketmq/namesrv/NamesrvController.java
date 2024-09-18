@@ -99,10 +99,14 @@ public class NamesrvController {
     }
 
     public boolean initialize() {
+        // 加载设置
         loadConfig();
+        // 初始化网络设置（netty）
         initiateNetworkComponents();
+        // 初始化两个线程池：RemotingExecutorThread_ 和 ClientRequestExecutorThread_
         initiateThreadExecutors();
         registerProcessor();
+        // 注册定时任务（扫描失活broker、日志等）
         startScheduleService();
         initiateSslContext();
         initiateRpcHooks();
@@ -114,12 +118,15 @@ public class NamesrvController {
     }
 
     private void startScheduleService() {
+        // 定时任务扫失活broker（5秒一次）
         this.scanExecutorService.scheduleAtFixedRate(NamesrvController.this.routeInfoManager::scanNotActiveBroker,
             5, this.namesrvConfig.getScanNotActiveBrokerInterval(), TimeUnit.MILLISECONDS);
 
+        // 定时任务打印日志（10秒一次）
         this.scheduledExecutorService.scheduleAtFixedRate(NamesrvController.this.kvConfigManager::printAllPeriodically,
             1, 10, TimeUnit.MINUTES);
 
+        // 定时打印水印：包含队列大小等（10秒一次）
         this.scheduledExecutorService.scheduleAtFixedRate(() -> {
             try {
                 NamesrvController.this.printWaterMark();
@@ -227,7 +234,7 @@ public class NamesrvController {
         }
 
         this.remotingClient.updateNameServerAddressList(Collections.singletonList(NetworkUtil.getLocalAddress()
-            + ":" + nettyServerConfig.getListenPort()));
+                + ":" + nettyServerConfig.getListenPort()));
         this.remotingClient.start();
 
         if (this.fileWatchService != null) {
